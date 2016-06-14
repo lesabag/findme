@@ -41,7 +41,8 @@ import java.util.Locale;
     Lior Esabag
 */
 
-public class FindMe extends FragmentActivity implements OnMapReadyCallback, LocationListener, android.location.GpsStatus.Listener {
+public class FindMe extends FragmentActivity implements OnMapReadyCallback,
+    LocationListener, android.location.GpsStatus.Listener {
 
     private GoogleMap mMap;
     LatLng latLng;
@@ -65,7 +66,6 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
             return;
         }
         mLocationManager.addGpsStatusListener(this);
-
     }
 
     @Override
@@ -86,15 +86,12 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
         } else {
             // Google Play Services are available
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-
             // Getting GoogleMap object from the fragment
-
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                     && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
             mMap.setMyLocationEnabled(true);
-
             mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
             Criteria cr = new Criteria();
@@ -111,7 +108,6 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
             Geocoder geoCoder = new Geocoder(getBaseContext(), Locale.getDefault());
             try {
                 addresses = geoCoder.getFromLocation(latitude, longitude, 1);
-                //tvAddress.setText("Your location: " + addresses.get(0).getAddressLine(1));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -138,7 +134,7 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
                 continue;
             }
             if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
-                // Found best last known location: %s", l);
+                // Found best last known location
                 bestLocation = l;
             }
         }
@@ -148,7 +144,6 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
     @Override
     protected void onRestart() {
         super.onRestart();
-        Toast.makeText(mContext, "onRestart" , Toast.LENGTH_SHORT).show();
         displayAddress();
     }
 
@@ -180,7 +175,6 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
                 .title("I'M HERE")
                 .snippet("U FindMe")
                 .icon(BitmapDescriptorFactory.fromResource(R.drawable.airplane)));
-               // .snippet(addresses.get(0).getAddressLine(1)));
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)      // Sets the center of the map to Mountain View
                 .zoom(16)                   // Sets the zoom
@@ -208,12 +202,10 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
 
     @Override
     public void onProviderEnabled(String provider) {
-
     }
 
     @Override
     public void onProviderDisabled(String provider) {
-
     }
 
     @Override
@@ -221,12 +213,11 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
         mStatus = mLocationManager.getGpsStatus(mStatus);
         switch (event) {
             case GpsStatus.GPS_EVENT_STARTED:
-                Toast.makeText(mContext, "GPS_EVENT_STARTED" , Toast.LENGTH_SHORT).show();
                 displayAddress();
                 break;
 
             case GpsStatus.GPS_EVENT_STOPPED:
-                Toast.makeText(mContext, "GPS_EVENT_STOPPED" , Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "GPS_STOPPED" , Toast.LENGTH_SHORT).show();
                 break;
 
             case GpsStatus.GPS_EVENT_FIRST_FIX:
@@ -253,5 +244,4 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback, Loca
             e.printStackTrace();
         }
     }
-
 }
