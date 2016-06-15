@@ -1,6 +1,5 @@
 package com.demo.lior.app.map;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -13,12 +12,9 @@ import android.location.GpsStatus;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.location.LocationProvider;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,15 +40,15 @@ import java.util.Locale;
 public class FindMe extends FragmentActivity implements OnMapReadyCallback,
     LocationListener, android.location.GpsStatus.Listener {
 
-    private GoogleMap mMap;
+    private GoogleMap mGmap;
     LatLng latLng;
     List<android.location.Address> addresses = null;
     Context mContext;
     double latitude, longitude;
     private boolean canGetLocation = false;
     LocationManager mLocationManager;
-    TextView tvAddress;
-    private GpsStatus mStatus;
+    TextView addressTv;
+    private GpsStatus mGpsStatus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +56,7 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
         checkGpsStatus(mLocationManager);
         setContentView(R.layout.activity_maps);
         mContext = getApplicationContext();
-        tvAddress = (TextView) findViewById(R.id.address);
+        addressTv = (TextView) findViewById(R.id.address);
         mLocationManager = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
@@ -75,24 +71,27 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
                 .findFragmentById(R.id.map);
 
         mapFragment.getMapAsync(this);
-        mMap = mapFragment.getMap();
+        mGmap = mapFragment.getMap();
         // Getting Google Play availability status
         int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(getBaseContext());
-        if (status != ConnectionResult.SUCCESS) { // Google Play Services are not available
+        if (status != ConnectionResult.SUCCESS)
+        { // Google Play Services are not available
             int requestCode = 10;
             Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, requestCode);
             dialog.show();
-
-        } else {
+        }
+        else
+        {
             // Google Play Services are available
             LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
             // Getting GoogleMap object from the fragment
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                    && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
                 return;
             }
-            mMap.setMyLocationEnabled(true);
-            mMap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
+            mGmap.setMyLocationEnabled(true);
+            mGmap.setMapType(GoogleMap.MAP_TYPE_HYBRID);
 
             Criteria cr = new Criteria();
             cr.setAccuracy(Criteria.ACCURACY_FINE);
@@ -100,7 +99,8 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
             String provider = locationManager.getBestProvider(cr, true);
 
             Location myLocation = getLastKnownLocation();
-            if (myLocation != null) {
+            if (myLocation != null)
+            {
                 latitude = myLocation.getLatitude();
                 longitude = myLocation.getLongitude();
                 latLng = new LatLng(latitude, longitude);
@@ -126,14 +126,18 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
         List<String> providers = mLocationManager.getProviders(true);
         Location bestLocation = null;
         for (String provider : providers) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                    && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+            {
                 return bestLocation;
             }
             Location l = mLocationManager.getLastKnownLocation(provider);
-            if (l == null) {
+            if (l == null)
+            {
                 continue;
             }
-            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy()) {
+            if (bestLocation == null || l.getAccuracy() < bestLocation.getAccuracy())
+            {
                 // Found best last known location
                 bestLocation = l;
             }
@@ -189,11 +193,11 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
         double latitude = location.getLatitude();
         double longitude = location.getLongitude();
         LatLng latLng = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(latLng));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
-        tvAddress.setText("");
-        tvAddress.setText("Location changed -> Latitude:" + latitude + ", Longitude:" + longitude);
+        mGmap.addMarker(new MarkerOptions().position(latLng));
+        mGmap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mGmap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        addressTv.setText("");
+        addressTv.setText("Location changed -> Latitude:" + latitude + ", Longitude:" + longitude);
     }
 
     @Override
@@ -210,7 +214,7 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
 
     @Override
     public void onGpsStatusChanged(int event) {
-        mStatus = mLocationManager.getGpsStatus(mStatus);
+        mGpsStatus = mLocationManager.getGpsStatus(mGpsStatus);
         switch (event) {
             case GpsStatus.GPS_EVENT_STARTED:
                 displayAddress();
@@ -239,7 +243,7 @@ public class FindMe extends FragmentActivity implements OnMapReadyCallback,
         Geocoder geoCoder = new Geocoder(getBaseContext(), Locale.getDefault());
         try {
             addresses = geoCoder.getFromLocation(latitude, longitude, 1);
-            tvAddress.setText("Your location: " + addresses.get(0).getAddressLine(1));
+            addressTv.setText("Your location: " + addresses.get(0).getAddressLine(1));
         } catch (IOException e) {
             e.printStackTrace();
         }
